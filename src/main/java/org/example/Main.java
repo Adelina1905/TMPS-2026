@@ -12,7 +12,7 @@ import java.nio.file.Path;
 
 public class Main {
     static void main() {
-        // LSP: swap for `new InMemoryApplicationRepository()` and nothing else has to change.
+        // DIP: swap for `new InMemoryApplicationRepository()` and nothing else has to change.
         ApplicationRepository repository = new JsonFileApplicationRepository(Path.of("applications.json"));
         Notifier notifier = new ConsoleNotifier();
         var service = new ApplicationService(repository, notifier);
