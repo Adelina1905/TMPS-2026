@@ -6,36 +6,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class JobApplication {
+public class JobApplication implements Prototype<JobApplication>{
     private final UUID id;
     private final Company company;
     private final String position;
     private final LocalDate appliedOn;
     private final String location;      // optional
     private final Integer salary;       // optional
-    private final String notes;
+    private final String notes;         // optional
     private ApplicationStatus status;
     private final List<StatusChange> history = new ArrayList<>();
 
-//    public JobApplication(Company company, String position, LocalDate appliedOn) {
-//        this(UUID.randomUUID(), company, position, appliedOn, ApplicationStatus.APPLIED);
-//    }
-//
-//
-//    public JobApplication(UUID id, Company company, String position, LocalDate appliedOn, ApplicationStatus status) {
-//        this(id, company, position, appliedOn, status, List.of());
-//    }
-//
-//    public JobApplication(UUID id, Company company, String position, LocalDate appliedOn,
-//                          ApplicationStatus status, List<StatusChange> history) {
-//        this.id = id;
-//        this.company = company;
-//        this.position = position;
-//        this.appliedOn = appliedOn;
-//        this.status = status;
-//        this.history.addAll(history);
-//    }
-
+    // Builder: the only way to create an application is JobApplication.builder(...).build().
     private JobApplication(Builder builder) {
         this.id = builder.id;
         this.company = builder.company;
@@ -47,6 +29,8 @@ public class JobApplication {
         this.status = builder.status;
         this.history.addAll(builder.history);
     }
+
+    // Required fields are taken here, so a builder can never be missing them.
     public static Builder builder(Company company, String position) {
         return new Builder(company, position);
     }
@@ -70,20 +54,20 @@ public class JobApplication {
         public Builder id(UUID id) { this.id = id; return this; }
         public Builder appliedOn(LocalDate appliedOn) { this.appliedOn = appliedOn; return this; }
         public Builder status(ApplicationStatus status) { this.status = status; return this; }
-        public Builder history(List<StatusChange> history) { this.history = history; return this;}
-            public Builder location(String location) { this.location = location; return this; }
-            public Builder salary(Integer salary) { this.salary = salary; return this; }
-            public Builder notes(String notes) { this.notes = notes; return this; }
+        public Builder history(List<StatusChange> history) { this.history = history; return this; }
+        public Builder location(String location) { this.location = location; return this; }
+        public Builder salary(Integer salary) { this.salary = salary; return this; }
+        public Builder notes(String notes) { this.notes = notes; return this; }
 
-            public JobApplication build() {
-                if (company == null) throw new IllegalArgumentException("Company is required");
-                if (position == null || position.isBlank()) throw new IllegalArgumentException("Position is required");
-                if (salary != null && salary < 0) throw new IllegalArgumentException("Salary must not be negative");
-                return new JobApplication(this);
-            }
-
+        public JobApplication build() {
+            if (company == null) throw new IllegalArgumentException("Company is required");
+            if (position == null || position.isBlank()) throw new IllegalArgumentException("Position is required");
+            if (id == null || appliedOn == null || status == null || history == null)
+                throw new IllegalArgumentException("Id, date, status and history must not be null");
+            if (salary != null && salary < 0) throw new IllegalArgumentException("Salary must not be negative");
+            return new JobApplication(this);
         }
-
+    }
 
     public void changeStatus(ApplicationStatus next){
         if(!status.canMoveTo(next))
@@ -91,6 +75,16 @@ public class JobApplication {
         history.add(new StatusChange(status, next, LocalDateTime.now()));
         status = next;
     }
+
+    @Override
+    public JobApplication copy() {
+        return builder(company, position)
+                .location(location)
+                .salary(salary)
+                .notes(notes)
+                .build();
+    }
+
 
     public UUID getId() {
         return id;

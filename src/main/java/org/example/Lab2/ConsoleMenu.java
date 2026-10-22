@@ -2,10 +2,10 @@ package org.example.Lab2;
 
 import org.example.Lab2.domain.ApplicationStatus;
 import org.example.Lab2.domain.Company;
+import org.example.Lab2.domain.JobApplication;
 import org.example.Lab2.filters.CompanyFilter;
 import org.example.Lab2.filters.StatusFilter;
 
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
@@ -32,6 +32,7 @@ public class ConsoleMenu {
                 5. Filter by company
                 6. Show status history
                 7. Delete
+                8. Reapply
                 0. Exit""");
             if (!in.hasNextLine()) return;
             try {
@@ -43,6 +44,7 @@ public class ConsoleMenu {
                     case "5" -> printer.printAll(service.find(new CompanyFilter(ask("Company: "))));
                     case "6" -> printer.printHistory(service.history(askId()));
                     case "7" -> delete();
+                    case "8" -> reapply();
                     case "0" -> { return; }
                     default -> System.out.println("Unknown option");
                 }
@@ -53,8 +55,15 @@ public class ConsoleMenu {
     }
     private void add() {
         var company = new Company(askNonBlank("Company: "));
-        var position = askNonBlank("Position: ");
-        var app = service.add(company, position, LocalDate.now());
+        var builder = JobApplication.builder(company, askNonBlank("Position: "));
+        // Optional fields: leaving the answer empty skips them.
+        var location = ask("Location (optional): ");
+        if (!location.isEmpty()) builder.location(location);
+        var salary = ask("Salary (optional): ");
+        if (!salary.isEmpty()) builder.salary(parseSalary(salary));
+        var notes = ask("Notes (optional): ");
+        if (!notes.isEmpty()) builder.notes(notes);
+        var app = service.add(builder);
         System.out.println("Added:");
         printer.print(app);
     }
@@ -67,7 +76,11 @@ public class ConsoleMenu {
         service.delete(askId());
         System.out.println("Deleted.");
     }
-
+    private void reapply() {
+        var app = service.reapply(askId());
+        System.out.println("Created a copy:");
+        printer.print(app);
+    }
     private String ask(String prompt) {
         System.out.print(prompt);
         if (!in.hasNextLine()) throw new NoSuchElementException("No input");
@@ -77,6 +90,13 @@ public class ConsoleMenu {
         var value = ask(prompt);
         if (value.isEmpty()) throw new IllegalArgumentException("Value must not be empty");
         return value;
+    }
+    private int parseSalary(String value) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Salary must be a whole number, got '" + value + "'");
+        }
     }
     private UUID askId() {
         return service.resolveId(ask("Id (first few characters): "));

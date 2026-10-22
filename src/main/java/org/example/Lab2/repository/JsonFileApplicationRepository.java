@@ -70,16 +70,26 @@ public class JsonFileApplicationRepository implements ApplicationRepository {
     }
 
     // File format kept separate from the domain class so JobApplication stays free of Jackson annotations.
+    // Files saved before location/salary/notes existed still load: Jackson fills the missing fields with null.
     private record Record(UUID id, String company, String position, LocalDate appliedOn,
-                          ApplicationStatus status, List<StatusChange> history) {
+                          ApplicationStatus status, List<StatusChange> history,
+                          String location, Integer salary, String notes) {
         static Record from(JobApplication a) {
             return new Record(a.getId(), a.getCompany().getName(), a.getPosition(),
-                    a.getAppliedOn(), a.getStatus(), a.getHistory());
+                    a.getAppliedOn(), a.getStatus(), a.getHistory(),
+                    a.getLocation(), a.getSalary(), a.getNotes());
         }
 
         JobApplication toDomain() {
-            return new JobApplication(id, new Company(company), position, appliedOn, status,
-                    history == null ? List.of() : history);
+            return JobApplication.builder(new Company(company), position)
+                    .id(id)
+                    .appliedOn(appliedOn)
+                    .status(status)
+                    .history(history == null ? List.of() : history)
+                    .location(location)
+                    .salary(salary)
+                    .notes(notes)
+                    .build();
         }
     }
 }

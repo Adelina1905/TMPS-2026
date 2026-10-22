@@ -1,14 +1,12 @@
 package org.example.Lab2;
 
 import org.example.Lab2.domain.ApplicationStatus;
-import org.example.Lab2.domain.Company;
 import org.example.Lab2.domain.JobApplication;
 import org.example.Lab2.domain.StatusChange;
 import org.example.Lab2.filters.ApplicationFilter;
 import org.example.Lab2.notification.Notifier;
 import org.example.Lab2.repository.ApplicationRepository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -21,8 +19,8 @@ public class ApplicationService {
         this.repository = repository;
         this.notifier = notifier;
     }
-    public JobApplication add(Company company, String position, LocalDate date){
-        var app = new JobApplication(company, position, date);
+    public JobApplication add(JobApplication.Builder builder){
+        var app = builder.build();
         repository.save(app);
         return app;
     }
@@ -61,5 +59,11 @@ public class ApplicationService {
     private JobApplication get(UUID id){
         return repository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No application with id " + id));
+    }
+
+    public JobApplication reapply(UUID id) {
+        var copy = get(id).copy();
+        repository.save(copy);
+        return copy;
     }
 }
