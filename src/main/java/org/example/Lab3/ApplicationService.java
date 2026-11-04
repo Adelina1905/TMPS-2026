@@ -4,6 +4,7 @@ import org.example.Lab3.domain.ApplicationStatus;
 import org.example.Lab3.domain.JobApplication;
 import org.example.Lab3.domain.StatusChange;
 import org.example.Lab3.filters.ApplicationFilter;
+import org.example.Lab3.importing.ApplicationSource;
 import org.example.Lab3.notification.Notifier;
 import org.example.Lab3.repository.ApplicationRepository;
 
@@ -59,6 +60,24 @@ public class ApplicationService {
     private JobApplication get(UUID id){
         return repository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No application with id " + id));
+    }
+
+    // Adapter: works with any ApplicationSource, without knowing where the data really comes from.
+    // An application with the same company, position and date as an existing one is skipped,
+    // so importing the same file twice does not create duplicates. Returns the imported ones.
+    public List<JobApplication> importFrom(ApplicationSource source) {
+        var existing = repository.findAll();
+        var imported = source.fetch().stream()
+                .filter(app -> existing.stream().noneMatch(e -> isSameJob(e, app)))
+                .toList();
+        imported.forEach(repository::save);
+        return imported;
+    }
+
+    private static boolean isSameJob(JobApplication a, JobApplication b) {
+        return a.getCompany().equals(b.getCompany())
+                && a.getPosition().equalsIgnoreCase(b.getPosition())
+                && a.getAppliedOn().equals(b.getAppliedOn());
     }
 
     public JobApplication reapply(UUID id) {

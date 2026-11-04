@@ -9,10 +9,15 @@ import org.example.Lab3.filters.CompanyFilter;
 import org.example.Lab3.filters.NotFilter;
 import org.example.Lab3.filters.OrFilter;
 import org.example.Lab3.filters.StatusFilter;
+import org.example.Lab3.importing.JobBoardAdapter;
+import org.example.Lab3.importing.jobboard.JobBoardExport;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.UUID;
@@ -40,6 +45,7 @@ public class ConsoleMenu {
                 7. Delete
                 8. Reapply
                 9. Advanced filter
+                10. Import from job board CSV
                 0. Exit""");
             if (!in.hasNextLine()) return;
             try {
@@ -53,10 +59,11 @@ public class ConsoleMenu {
                     case "7" -> delete();
                     case "8" -> reapply();
                     case "9" -> advancedFilter();
+                    case "10" -> importFromJobBoard();
                     case "0" -> { return; }
                     default -> System.out.println("Unknown option");
                 }
-            } catch (IllegalArgumentException | IllegalStateException | NoSuchElementException e) {
+            } catch (IllegalArgumentException | IllegalStateException | NoSuchElementException | UncheckedIOException e) {
                 System.out.println("Error: " + e.getMessage());
             }
         }
@@ -109,6 +116,15 @@ public class ConsoleMenu {
         var filter = new AndFilter(parts);
         System.out.println("Filter: " + filter.describe());
         printer.printAll(service.find(filter));
+    }
+    // Adapter: the job board reader is wrapped in an adapter, so the service receives a normal ApplicationSource.
+    private void importFromJobBoard() {
+        var path = Path.of(askNonBlank("CSV file path: "));
+        if (!Files.exists(path)) throw new IllegalArgumentException("File not found: " + path);
+        var source = new JobBoardAdapter(new JobBoardExport(path));
+        var imported = service.importFrom(source);
+        System.out.println("Imported " + imported.size() + " application(s) from " + source.description() + ":");
+        printer.printAll(imported);
     }
     private List<String> askList(String prompt) {
         return Arrays.stream(ask(prompt).split(","))
