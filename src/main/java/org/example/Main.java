@@ -1,14 +1,14 @@
 package org.example;
 
-import org.example.Lab2.ApplicationPrinter;
-import org.example.Lab2.ApplicationService;
-import org.example.Lab2.ConsoleMenu;
-import org.example.Lab2.notification.ConsoleNotifier;
-import org.example.Lab2.notification.Notifier;
-import org.example.Lab2.repository.ApplicationRepository;
-import org.example.Lab2.repository.InMemoryRepositoryFactory;
-import org.example.Lab2.repository.JsonRepositoryFactory;
-import org.example.Lab2.repository.RepositoryFactory;
+import org.example.Lab3.ApplicationPrinter;
+import org.example.Lab3.ApplicationService;
+import org.example.Lab3.ConsoleMenu;
+import org.example.Lab3.notification.ConsoleNotifier;
+import org.example.Lab3.notification.Notifier;
+import org.example.Lab3.repository.ApplicationRepository;
+import org.example.Lab3.repository.InMemoryRepositoryFactory;
+import org.example.Lab3.repository.JsonRepositoryFactory;
+import org.example.Lab3.repository.RepositoryFactory;
 
 import java.nio.file.Path;
 

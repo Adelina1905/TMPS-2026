@@ -3,10 +3,16 @@ package org.example.Lab3;
 import org.example.Lab3.domain.ApplicationStatus;
 import org.example.Lab3.domain.Company;
 import org.example.Lab3.domain.JobApplication;
+import org.example.Lab3.filters.AndFilter;
+import org.example.Lab3.filters.ApplicationFilter;
 import org.example.Lab3.filters.CompanyFilter;
+import org.example.Lab3.filters.NotFilter;
+import org.example.Lab3.filters.OrFilter;
 import org.example.Lab3.filters.StatusFilter;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.UUID;
@@ -33,6 +39,7 @@ public class ConsoleMenu {
                 6. Show status history
                 7. Delete
                 8. Reapply
+                9. Advanced filter
                 0. Exit""");
             if (!in.hasNextLine()) return;
             try {
@@ -45,6 +52,7 @@ public class ConsoleMenu {
                     case "6" -> printer.printHistory(service.history(askId()));
                     case "7" -> delete();
                     case "8" -> reapply();
+                    case "9" -> advancedFilter();
                     case "0" -> { return; }
                     default -> System.out.println("Unknown option");
                 }
@@ -81,6 +89,33 @@ public class ConsoleMenu {
         System.out.println("Created a copy:");
         printer.print(app);
     }
+    // Composite: builds a tree of filters, e.g. (status = APPLIED OR status = INTERVIEW) AND company = Google AND NOT ...
+    private void advancedFilter() {
+        System.out.println("Leave a question empty to skip it. Separate several values with commas.");
+        var parts = new ArrayList<ApplicationFilter>();
+
+        var statuses = askList("Statuses (any of): ").stream()
+                .map(s -> (ApplicationFilter) new StatusFilter(parseStatus(s))).toList();
+        if (!statuses.isEmpty()) parts.add(new OrFilter(statuses));
+
+        var companies = askList("Companies (any of): ").stream()
+                .map(c -> (ApplicationFilter) new CompanyFilter(c)).toList();
+        if (!companies.isEmpty()) parts.add(new OrFilter(companies));
+
+        var excluded = askList("Exclude statuses: ").stream()
+                .map(s -> (ApplicationFilter) new StatusFilter(parseStatus(s))).toList();
+        if (!excluded.isEmpty()) parts.add(new NotFilter(new OrFilter(excluded)));
+
+        var filter = new AndFilter(parts);
+        System.out.println("Filter: " + filter.describe());
+        printer.printAll(service.find(filter));
+    }
+    private List<String> askList(String prompt) {
+        return Arrays.stream(ask(prompt).split(","))
+                .map(String::trim)
+                .filter(v -> !v.isEmpty())
+                .toList();
+    }
     private String ask(String prompt) {
         System.out.print(prompt);
         if (!in.hasNextLine()) throw new NoSuchElementException("No input");
@@ -102,7 +137,9 @@ public class ConsoleMenu {
         return service.resolveId(ask("Id (first few characters): "));
     }
     private ApplicationStatus askStatus() {
-        var value = ask("Status " + Arrays.toString(ApplicationStatus.values()) + ": ");
+        return parseStatus(ask("Status " + Arrays.toString(ApplicationStatus.values()) + ": "));
+    }
+    private ApplicationStatus parseStatus(String value) {
         try {
             return ApplicationStatus.valueOf(value.toUpperCase());
         } catch (IllegalArgumentException e) {
