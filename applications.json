@@ -3,10 +3,37 @@
   "company" : "Endava",
   "position" : "Junior Software Developer",
   "appliedOn" : "2026-10-15",
-  "status" : "INTERVIEW",
+  "status" : "REJECTED",
   "history" : [ {
     "from" : "APPLIED",
     "to" : "INTERVIEW",
     "time" : "2026-10-15T09:33:42.5048685"
-  } ]
+  }, {
+    "from" : "INTERVIEW",
+    "to" : "REJECTED",
+    "time" : "2026-10-29T09:05:11.200556226"
+  } ],
+  "location" : null,
+  "salary" : null,
+  "notes" : null
+}, {
+  "id" : "c7d0f0e6-48d8-4f1a-ae66-a6508f855363",
+  "company" : "Endava",
+  "position" : "Junior Software Developer",
+  "appliedOn" : "2026-10-29",
+  "status" : "APPLIED",
+  "history" : [ ],
+  "location" : null,
+  "salary" : null,
+  "notes" : null
+}, {
+  "id" : "792fff5a-fd0b-4202-851b-01122cd7f714",
+  "company" : "Endava",
+  "position" : "Junior Software Developer",
+  "appliedOn" : "2026-10-29",
+  "status" : "APPLIED",
+  "history" : [ ],
+  "location" : null,
+  "salary" : null,
+  "notes" : null
 } ]
