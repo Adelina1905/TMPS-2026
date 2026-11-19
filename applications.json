@@ -36,4 +36,18 @@
   "location" : null,
   "salary" : null,
   "notes" : null
+}, {
+  "id" : "2f3f5081-3ac6-47e0-b22d-96648a9d2a9d",
+  "company" : "Noction",
+  "position" : "Junior Full-Stack Developer",
+  "appliedOn" : "2026-11-12",
+  "status" : "INTERVIEW",
+  "history" : [ {
+    "from" : "APPLIED",
+    "to" : "INTERVIEW",
+    "time" : "2026-11-12T12:17:38.808383274"
+  } ],
+  "location" : null,
+  "salary" : null,
+  "notes" : null
 } ]
